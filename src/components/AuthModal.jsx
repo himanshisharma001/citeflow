@@ -8,7 +8,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 
- const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+ const API_BASE = import.meta.env.VITE_API_URL || "https://citeflow-backend-l2y7.onrender.com";
 
 export const AuthModal = ({ isOpen, onLoginSuccess }) => {
   const [email, setEmail] = useState("");
