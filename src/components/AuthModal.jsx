@@ -1,42 +1,51 @@
-import React, { useState } from 'react';
-import { Lock, Mail, Key, ShieldCheck, Sparkles, AlertCircle } from 'lucide-react';
+import React, { useState } from "react";
+import {
+  Lock,
+  Mail,
+  Key,
+  ShieldCheck,
+  Sparkles,
+  AlertCircle,
+} from "lucide-react";
+
+ const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export const AuthModal = ({ isOpen, onLoginSuccess }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   if (!isOpen) return null;
 
   const handleFillDemo = () => {
-    setEmail('demo@citeflow.ai');
-    setPassword('citeflow123');
-    setError('');
+    setEmail("demo@citeflow.ai");
+    setPassword("citeflow123");
+    setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     try {
-      const res = await fetch('http://localhost:5000/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch(`${API_BASE}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
       if (res.ok && data.token) {
-        localStorage.setItem('citeflow_token', data.token);
-        localStorage.setItem('citeflow_user', JSON.stringify(data.user));
+        localStorage.setItem("citeflow_token", data.token);
+        localStorage.setItem("citeflow_user", JSON.stringify(data.user));
         onLoginSuccess(data.user);
       } else {
-        setError(data.error || 'Authentication failed');
+        setError(data.error || "Authentication failed");
       }
     } catch (err) {
-      setError('Cannot connect to backend server on port 5000');
+      setError("Cannot connect to backend server on port 5000");
     } finally {
       setIsLoading(false);
     }
@@ -50,16 +59,21 @@ export const AuthModal = ({ isOpen, onLoginSuccess }) => {
           <div className="w-12 h-12 rounded-xl bg-sky-600/20 border border-sky-500/30 flex items-center justify-center text-sky-400 mb-3 shadow-lg shadow-sky-600/20">
             <Lock className="w-6 h-6" />
           </div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Access CiteFlow Studio</h2>
+          <h2 className="text-xl font-bold text-white tracking-tight">
+            Access CiteFlow Studio
+          </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Sign in to unlock interactive AI document intelligence and citations.
+            Sign in to unlock interactive AI document intelligence and
+            citations.
           </p>
         </div>
 
         {/* Demo Credentials Quick-Fill Banner */}
         <div className="mb-5 p-3 rounded-xl bg-sky-950/40 border border-sky-800/60 flex items-center justify-between">
           <div className="text-[11px] text-sky-300">
-            <span className="font-semibold block text-slate-200">Test Credentials:</span>
+            <span className="font-semibold block text-slate-200">
+              Test Credentials:
+            </span>
             <span>demo@citeflow.ai / citeflow123</span>
           </div>
           <button
@@ -82,7 +96,9 @@ export const AuthModal = ({ isOpen, onLoginSuccess }) => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">Email Address</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1.5">
+              Email Address
+            </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
               <input
@@ -97,7 +113,9 @@ export const AuthModal = ({ isOpen, onLoginSuccess }) => {
           </div>
 
           <div>
-            <label className="block text-xs font-medium text-slate-300 mb-1.5">Password</label>
+            <label className="block text-xs font-medium text-slate-300 mb-1.5">
+              Password
+            </label>
             <div className="relative">
               <Key className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
               <input
@@ -117,7 +135,7 @@ export const AuthModal = ({ isOpen, onLoginSuccess }) => {
             className="w-full mt-2 bg-sky-600 hover:bg-sky-500 text-white font-semibold text-xs py-3 rounded-xl transition-all shadow-lg shadow-sky-600/20 active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <ShieldCheck className="w-4 h-4" />
-            <span>{isLoading ? 'Verifying...' : 'Sign In to Workspace'}</span>
+            <span>{isLoading ? "Verifying..." : "Sign In to Workspace"}</span>
           </button>
         </form>
       </div>

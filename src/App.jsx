@@ -40,8 +40,8 @@ export default function App() {
     updateActiveMessages,
   } = useChatSessions();
 
-  const { isStreaming, cooldownSeconds, sendMessage, stopStream } =
-    useChatStream("http://localhost:5000");
+  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+  const { isStreaming, sendMessage, stopStream } = useChatStream(API_BASE);
 
   const handleLogout = () => {
     localStorage.removeItem("citeflow_token");
