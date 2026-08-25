@@ -1,18 +1,20 @@
-import React, { useState, useRef } from "react";
-import { Navbar } from "./components/Navbar";
-import { PdfViewer } from "./components/PdfViewer";
-import { ChatStudio } from "./components/ChatStudio";
-import { ChatSidebar } from "./components/ChatSidebar";
-import { AuthModal } from "./components/AuthModal";
-import { useChatSessions } from "./hooks/useChatSessions";
-import { useChatStream } from "./hooks/useChatStream";
-import { pdfjs } from "react-pdf";
+import React, { useState, useRef } from 'react';
+import { Navbar } from './components/Navbar';
+import { PdfViewer } from './components/PdfViewer';
+import { ChatStudio } from './components/ChatStudio';
+import { ChatSidebar } from './components/ChatSidebar';
+import { AuthModal } from './components/AuthModal';
+import { useChatSessions } from './hooks/useChatSessions';
+import { useChatStream } from './hooks/useChatStream';
+import { pdfjs } from 'react-pdf';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'https://citeflow-backend-l2y7.onrender.com';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
-      const saved = localStorage.getItem("citeflow_user");
-      const token = localStorage.getItem("citeflow_token");
+      const saved = localStorage.getItem('citeflow_user');
+      const token = localStorage.getItem('citeflow_token');
       return saved && token ? JSON.parse(saved) : null;
     } catch {
       return null;
@@ -20,12 +22,12 @@ export default function App() {
   });
 
   const [file, setFile] = useState(null);
-  const [fileName, setFileName] = useState("");
+  const [fileName, setFileName] = useState('');
   const [numPages, setNumPages] = useState(0);
   const [activeHighlightPage, setActiveHighlightPage] = useState(null);
-  const [activeMobileTab, setActiveMobileTab] = useState("pdf");
+  const [activeMobileTab, setActiveMobileTab] = useState('pdf');
   const [extractedPages, setExtractedPages] = useState([]);
-  const [statusText, setStatusText] = useState("");
+  const [statusText, setStatusText] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const fileInputRef = useRef(null);
@@ -40,33 +42,32 @@ export default function App() {
     updateActiveMessages,
   } = useChatSessions();
 
-  const API_BASE = import.meta.env.VITE_API_URL || "https://citeflow-backend-l2y7.onrender.com";
-  const { isStreaming, sendMessage, stopStream } = useChatStream(API_BASE);
+  const { isStreaming, cooldownSeconds = 0, sendMessage, stopStream } = useChatStream(API_BASE);
 
   const handleLogout = () => {
-    localStorage.removeItem("citeflow_token");
-    localStorage.removeItem("citeflow_user");
+    localStorage.removeItem('citeflow_token');
+    localStorage.removeItem('citeflow_user');
     setCurrentUser(null);
     setFile(null);
-    setFileName("");
+    setFileName('');
     setExtractedPages([]);
     setIsSidebarOpen(false);
   };
 
   const handleUploadClick = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      fileInputRef.current.value = '';
       fileInputRef.current.click();
     }
   };
 
   const handleFileUpload = async (e) => {
     const selectedFile = e.target.files?.[0];
-    if (!selectedFile || selectedFile.type !== "application/pdf") return;
+    if (!selectedFile || selectedFile.type !== 'application/pdf') return;
 
     setFile(selectedFile);
     setFileName(selectedFile.name);
-    setStatusText("Reading PDF...");
+    setStatusText('Reading PDF...');
 
     try {
       const arrayBuffer = await selectedFile.arrayBuffer();
@@ -76,7 +77,7 @@ export default function App() {
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        const pageText = textContent.items.map((item) => item.str).join(" ");
+        const pageText = textContent.items.map((item) => item.str).join(' ');
         pagesData.push({
           pageNumber: i,
           text: pageText,
@@ -85,43 +86,38 @@ export default function App() {
 
       setExtractedPages(pagesData);
       setNumPages(pdf.numPages);
-      setStatusText("Ready");
+      setStatusText('Ready');
     } catch (err) {
-      console.error("PDF Read Error:", err);
-      setStatusText("Read Error");
+      console.error('PDF Read Error:', err);
+      setStatusText('Read Error');
     }
   };
 
   const handleSendMessage = async (prompt) => {
-    await sendMessage(
-      prompt,
-      extractedPages,
-      currentSession?.messages || [],
-      (updatedList) => {
-        updateActiveMessages(updatedList);
-      },
-    );
+    await sendMessage(prompt, extractedPages, currentSession?.messages || [], (updatedList) => {
+      updateActiveMessages(updatedList);
+    });
   };
 
   const handleClearChat = () => {
     updateActiveMessages([
       {
-        role: "assistant",
+        role: 'assistant',
         content:
-          "Upload a document to begin. When answering questions, citations will appear like [Page 1] for direct navigation.",
+          'Upload a document to begin. When answering questions, citations will appear like [Page 1] for direct navigation.',
       },
     ]);
   };
 
   const handleJumpToPage = (pageNumber) => {
     if (window.innerWidth < 768) {
-      setActiveMobileTab("pdf");
+      setActiveMobileTab('pdf');
     }
 
     setTimeout(() => {
       const targetElement = document.getElementById(`pdf-page-${pageNumber}`);
       if (targetElement) {
-        targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         setActiveHighlightPage(pageNumber);
 
         setTimeout(() => {
@@ -131,15 +127,14 @@ export default function App() {
     }, 150);
   };
 
-  // If user is not authenticated, display only the login interface
   if (!currentUser) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-[#090d16]">
         <AuthModal
-          isOpen={!currentUser}
+          isOpen={true}
           onLoginSuccess={(user) => {
             setCurrentUser(user);
-            createNewSession(); // Instantly activates a clean new chat tab
+            createNewSession();
           }}
         />
       </div>
@@ -184,7 +179,7 @@ export default function App() {
             setNumPages={setNumPages}
             activeHighlightPage={activeHighlightPage}
             onUploadClick={handleUploadClick}
-            isVisibleMobile={activeMobileTab === "pdf"}
+            isVisibleMobile={activeMobileTab === 'pdf'}
           />
           <ChatStudio
             onCitationClick={handleJumpToPage}
@@ -195,7 +190,7 @@ export default function App() {
             isStreaming={isStreaming}
             cooldownSeconds={cooldownSeconds}
             onStopStream={stopStream}
-            isVisibleMobile={activeMobileTab === "chat"}
+            isVisibleMobile={activeMobileTab === 'chat'}
             hasDocument={Boolean(file)}
           />
         </main>
